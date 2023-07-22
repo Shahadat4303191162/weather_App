@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:geocoding/geocoding.dart' as Geo;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,5 +81,24 @@ class WeatherProvider extends ChangeNotifier{
     unit = value ? imperial : metric;
     unitSymbol = value ? fahrenheit : celsius;
     notifyListeners();
+  }
+
+  void convertCityToLatLng({
+    required String result,
+    required Function(String) onError,
+  }) async{
+    try{
+      final locList = await Geo.locationFromAddress(result);
+      if(locList.isNotEmpty){
+        final location = locList.first;
+        setNewLocation(location.latitude, location.longitude);
+        getWeatherData();
+      }else{
+        onError('City not found');
+      }
+    }catch(error){
+      onError(error.toString());
+    }
+
   }
 }
