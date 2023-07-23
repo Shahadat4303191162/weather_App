@@ -40,3 +40,7 @@ Future<Position> determinePosition() async {
   // continue accessing the position of the device.
   return await Geolocator.getCurrentPosition();
 }
+
+Future<bool> get isLocationServiceEnabled => Geolocator.isLocationServiceEnabled();
+
+Future<bool> get openLocationSettings => Geolocator.openLocationSettings();
