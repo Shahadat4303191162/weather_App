@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -22,10 +25,20 @@ class _WeatherPageState extends State<WeatherPage>
   late WeatherProvider
       provider; //weatherProvider er object nilam provider name e
   bool isFirst = true;
+  String loadingMsg = 'please wait';
+  late StreamSubscription<ConnectivityResult> subscription;
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    subscription = Connectivity().onConnectivityChanged.listen((result) {
+      if(result == ConnectivityResult.mobile || result == ConnectivityResult.wifi){
+        setState(() {
+          loadingMsg = 'Please Wait';
+        });
+        _detectLocation();
+      }
+    });
     super.initState();
   }
 
@@ -33,6 +46,15 @@ class _WeatherPageState extends State<WeatherPage>
   void didChangeDependencies() {
     if (isFirst) {
       provider = Provider.of<WeatherProvider>(context);
+      isConnectedToInternet().then((value) {
+        if(value){
+          _detectLocation();
+        } else{
+            setState(() {
+              loadingMsg = 'NO internet connection detected. Please turn on your wifi or mobile data';
+            });
+        }
+      });
       _detectLocation();
       isFirst = false;
     }
@@ -42,6 +64,7 @@ class _WeatherPageState extends State<WeatherPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    subscription.cancel();
     super.dispose();
   }
 
@@ -113,7 +136,10 @@ class _WeatherPageState extends State<WeatherPage>
                   _forecastWeatherSection(),
                 ],
               )
-            :  Text('Please wait',style: txtNormal16,),
+            :  Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(loadingMsg,style: txtNormal16,),
+            ),
       ),
     );
   }

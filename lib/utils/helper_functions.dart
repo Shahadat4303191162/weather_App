@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 String getFormattedDateTime(num dt, String pattern){
@@ -29,4 +30,13 @@ showMsgWithAction({
           },
         ),
       ));
+}
+
+Future<bool> isConnectedToInternet() async{
+  final connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile ||
+      connectivityResult == ConnectivityResult.wifi) {
+    return true;
+  }
+  return false;
 }
